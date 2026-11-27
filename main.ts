@@ -1,4 +1,4 @@
-// Deal Autopsy II — Price War: the hand-in program (Node 22, stdlib only).
+// Deal Autopsy II — Price War: the hand-in program, Node 22, stdlib only.
 //
 // It hands the site in, in this order:
 //   1. Finds the repository root from this file's own path on the command

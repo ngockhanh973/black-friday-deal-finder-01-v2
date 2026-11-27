@@ -1,139 +1,149 @@
-// Boot and routing for the Price War board. The header, tabs, search and
-// filters live in index.html; this file wires them up and swaps the grid,
-// Price War, Hall of Shame and detail views on hash changes.
-// Routes: #/ (grid), #/war, #/shame, #/deal/<id>.
-// A filtered grid can be shared as a link: #/?q=airpods&cat=Tech&min=50.
+// Boot and routing for the Price War board. The header, tabs, search box and
+// filter controls live in index.html; this module wires them up and swaps the
+// grid, Price War, Hall of Shame and single-deal views when the hash moves.
+// Routes are #/ for the grid, #/war, #/shame and #/deal/<id>. A filtered grid
+// is shareable as a link, for instance #/?q=airpods&cat=Tech&min=50.
 
-import { CATEGORIES, STORES, deals, CHECKED_DAY } from "./deals.js";
-import { MISSIONS, SORTS, applyFilters, resetFilters, state } from "./filters.js";
-import { detailHtml, findDeal, gridHtml } from "./board.js";
+import { CHECKED_DAY, CATEGORIES, STORES, deals } from "./deals.js";
+import { SORTS, MISSIONS, state, applyFilters, resetFilters } from "./filters.js";
+import { gridHtml, detailHtml, findDeal } from "./board.js";
 import { warHtml } from "./warboard.js";
 import { shameHtml } from "./shameboard.js";
 
-const app = document.getElementById("app");
-const searchBox = document.getElementById("search");
-const categoryRow = document.getElementById("category-chips");
-const missionRow = document.getElementById("mission-chips");
-const storePick = document.getElementById("store-filter");
-const discountPick = document.getElementById("discount-filter");
-const sortPick = document.getElementById("sort-select");
-const clearBtn = document.getElementById("clear-filters");
-const tabLinks = [...document.querySelectorAll(".tab")];
+// Every control this module touches is looked up once, through one table,
+// so the ids live in a single place instead of ten scattered statements.
+const IDS = [
+  ["root", "app"],
+  ["search", "search"],
+  ["cats", "category-chips"],
+  ["missions", "mission-chips"],
+  ["store", "store-filter"],
+  ["discount", "discount-filter"],
+  ["sort", "sort-select"],
+  ["clear", "clear-filters"],
+  ["count", "deal-count"],
+  ["checked", "checked-day"],
+];
+const el = {};
+for (const [key, id] of IDS) el[key] = document.getElementById(id);
+const tabLinks = Array.from(document.querySelectorAll(".tab"));
 
-function pressButton(label, active, onClick) {
+function chipButton(label, on, onClick) {
   const b = document.createElement("button");
   b.type = "button";
-  b.className = "chip" + (active ? " active" : "");
+  b.className = on ? "chip active" : "chip";
   b.textContent = label;
-  b.setAttribute("aria-pressed", active ? "true" : "false");
+  b.setAttribute("aria-pressed", on ? "true" : "false");
   b.addEventListener("click", onClick);
   return b;
-}
+} // chipButton
 
-function buildControls() {
-  categoryRow.textContent = "";
-  categoryRow.appendChild(pressButton("All", state.category === "All", () => { state.category = "All"; render(); }));
+function paintControls() {
+  el.cats.textContent = "";
+  el.cats.appendChild(chipButton("All", state.category === "All", () => { state.category = "All"; draw(); }));
   for (const c of CATEGORIES) {
-    categoryRow.appendChild(pressButton(c, state.category === c, () => { state.category = c; render(); }));
+    el.cats.appendChild(chipButton(c, state.category === c, () => { state.category = c; draw(); }));
   }
-  missionRow.textContent = "";
+  el.missions.textContent = "";
   for (const m of MISSIONS) {
-    const active = (m.id === "under-50" && state.maxPrice === 50) ||
+    const on = (m.id === "under-50" && state.maxPrice === 50) ||
       (m.id === "under-100" && state.maxPrice === 100) ||
       (m.id === "gaming-300" && state.maxPrice === 300 && state.category === "Gaming");
-    missionRow.appendChild(pressButton(m.label, active, () => { resetFilters(); m.run(); render(); }));
+    el.missions.appendChild(chipButton(m.label, on, () => { resetFilters(); m.run(); draw(); }));
   }
-  storePick.textContent = "";
-  const allOpt = document.createElement("option");
-  allOpt.value = "All";
-  allOpt.textContent = "All stores";
-  storePick.appendChild(allOpt);
+  el.store.textContent = "";
+  const allStoresOpt = document.createElement("option");
+  allStoresOpt.value = "All";
+  allStoresOpt.textContent = "All stores";
+  el.store.appendChild(allStoresOpt);
   for (const s of STORES) {
-    const o = document.createElement("option");
-    o.value = s;
-    o.textContent = s;
-    storePick.appendChild(o);
+    const opt = document.createElement("option");
+    opt.value = s;
+    opt.textContent = s;
+    el.store.appendChild(opt);
   }
-  storePick.value = state.store;
-  discountPick.value = String(state.minDiscount);
-  sortPick.textContent = "";
+  el.store.value = state.store;
+  el.discount.value = String(state.minDiscount);
+  el.sort.textContent = "";
   for (const s of SORTS) {
-    const o = document.createElement("option");
-    o.value = s.id;
-    o.textContent = s.label;
-    sortPick.appendChild(o);
+    const opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = s.label;
+    el.sort.appendChild(opt);
   }
-  sortPick.value = state.sort;
-}
+  el.sort.value = state.sort;
+} // paintControls
 
-function readControls() {
-  state.query = searchBox.value.trim();
-  if (storePick.value) state.store = storePick.value;
-  if (discountPick.value !== "") state.minDiscount = Number(discountPick.value);
-  if (sortPick.value) state.sort = sortPick.value;
-}
+function syncFromControls() {
+  state.query = el.search.value.trim();
+  if (el.store.value) state.store = el.store.value;
+  if (el.discount.value !== "") state.minDiscount = Number(el.discount.value);
+  if (el.sort.value) state.sort = el.sort.value;
+} // syncFromControls
 
-function readHashParams() {
-  const hash = location.hash || "#/";
-  const q = hash.indexOf("?");
-  if (q < 0) return;
-  const params = new URLSearchParams(hash.slice(q + 1));
-  const cat = params.get("cat");
-  if (cat && (cat === "All" || CATEGORIES.includes(cat))) state.category = cat;
-  const store = params.get("store");
-  if (store && (store === "All" || STORES.includes(store))) state.store = store;
-  const min = Number(params.get("min"));
-  if (min === 30 || min === 50) state.minDiscount = min;
-  const max = Number(params.get("max"));
-  if (max === 50 || max === 100 || max === 300) state.maxPrice = max;
-  const sort = params.get("sort");
-  if (sort && SORTS.some((s) => s.id === sort)) state.sort = sort;
-  const query = params.get("q");
-  if (query) {
-    state.query = query;
-    searchBox.value = query;
+function applyHashParams() {
+  const rawHash = location.hash || "#/";
+  const qm = rawHash.indexOf("?");
+  if (qm < 0) return;
+  const qp = new URLSearchParams(rawHash.slice(qm + 1));
+  const catQ = qp.get("cat");
+  if (catQ && (catQ === "All" || CATEGORIES.includes(catQ))) state.category = catQ;
+  const storeQ = qp.get("store");
+  if (storeQ && (storeQ === "All" || STORES.includes(storeQ))) state.store = storeQ;
+  const minQ = Number(qp.get("min"));
+  if (minQ === 30 || minQ === 50) state.minDiscount = minQ;
+  const maxQ = Number(qp.get("max"));
+  if (maxQ === 50 || maxQ === 100 || maxQ === 300) state.maxPrice = maxQ;
+  const sortQ = qp.get("sort");
+  if (sortQ && SORTS.some((s) => s.id === sortQ)) state.sort = sortQ;
+  const queryQ = qp.get("q");
+  if (queryQ) {
+    state.query = queryQ;
+    el.search.value = queryQ;
   }
-}
+} // applyHashParams
 
-function markTab(hash) {
-  const view = hash.startsWith("#/deal/") ? "deal" : hash.startsWith("#/war") ? "war" : hash.startsWith("#/shame") ? "shame" : "grid";
+function highlightTab(h) {
+  let view = "grid";
+  if (h.startsWith("#/deal/")) view = "deal";
+  else if (h.startsWith("#/war")) view = "war";
+  else if (h.startsWith("#/shame")) view = "shame";
   for (const t of tabLinks) t.classList.toggle("active", t.dataset.view === view);
-}
+} // highlightTab
 
-function render() {
-  buildControls();
-  readControls();
-  readHashParams();
-  buildControls();
+function draw() {
+  paintControls();
+  syncFromControls();
+  applyHashParams();
+  paintControls();
   const hash = location.hash || "#/";
-  markTab(hash);
+  highlightTab(hash);
   if (hash.startsWith("#/deal/")) {
-    app.innerHTML = detailHtml(findDeal(hash.slice(7).split("?")[0]));
+    el.root.innerHTML = detailHtml(findDeal(hash.slice(7).split("?")[0]));
   } else if (hash.startsWith("#/war")) {
-    app.innerHTML = warHtml();
+    el.root.innerHTML = warHtml();
   } else if (hash.startsWith("#/shame")) {
-    app.innerHTML = shameHtml();
+    el.root.innerHTML = shameHtml();
   } else {
-    app.innerHTML = gridHtml();
+    el.root.innerHTML = gridHtml();
   }
-  const shown = hash.startsWith("#/") && !hash.startsWith("#/deal") && !hash.startsWith("#/war") && !hash.startsWith("#/shame")
-    ? applyFilters().length
-    : deals.length;
-  document.getElementById("deal-count").textContent = `${shown} of ${deals.length} deals`;
+  const onGrid = hash.startsWith("#/") && !hash.startsWith("#/deal") && !hash.startsWith("#/war") && !hash.startsWith("#/shame");
+  const shown = onGrid ? applyFilters().length : deals.length;
+  el.count.textContent = shown + " of " + deals.length + " deals";
   window.scrollTo(0, 0);
-}
+} // draw
 
-searchBox.addEventListener("input", render);
-storePick.addEventListener("change", render);
-discountPick.addEventListener("change", render);
-sortPick.addEventListener("change", render);
-clearBtn.addEventListener("click", () => {
+el.search.addEventListener("input", draw);
+el.store.addEventListener("change", draw);
+el.discount.addEventListener("change", draw);
+el.sort.addEventListener("change", draw);
+el.clear.addEventListener("click", () => {
   resetFilters();
-  searchBox.value = "";
-  discountPick.value = "0";
-  render();
+  el.search.value = "";
+  el.discount.value = "0";
+  draw();
 });
-window.addEventListener("hashchange", render);
+window.addEventListener("hashchange", draw);
 
-document.getElementById("checked-day").textContent = `All prices checked ${CHECKED_DAY} evening`;
-render();
+el.checked.textContent = "All prices checked " + CHECKED_DAY + " evening";
+draw();
