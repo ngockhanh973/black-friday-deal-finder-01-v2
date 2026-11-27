@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deal Autopsy II — Price War | Black Friday Deal Finder</title>
+<meta name="description" content="Forty-eight Black Friday deals, cut open and checked: real prices, cross-store price wars, and a Hall of Shame for inflated sales.">
+<link rel="stylesheet" href="style.css">
+<script type="module" src="main.js"></script>
+</head>
+<body>
+<header class="masthead">
+  <p class="kicker">BLACK FRIDAY &middot; 27 NOV 2026 &middot; CYBER MONDAY 30 NOV</p>
+  <h1><a href="#/">Deal Autopsy II</a> <span class="subtitle">— Price War</span></h1>
+  <p class="tagline">Forty-eight deals, cut open. Lowest ever, strong cut, routine sale, or inflated — we say which, show the evidence, and put the same product's price at every store side by side.</p>
+  <p class="ticker"><span id="checked-day">All prices checked 27 Nov 2026 evening</span> &middot; <span id="deal-count">48 of 48 deals</span> &middot; Prices in US dollars, before tax.</p>
+  <nav class="tabs" aria-label="Views">
+    <a class="tab active" data-view="grid" href="#/">All deals</a>
+    <a class="tab" data-view="war" href="#/war">Price War</a>
+    <a class="tab" data-view="shame" href="#/shame">Hall of Shame</a>
+  </nav>
+</header>
+<section class="controls" aria-label="Search and filters">
+  <div class="control-row">
+    <label class="search-wrap">Search deals
+      <input id="search" type="search" placeholder="Try &ldquo;AirPods&rdquo;, &ldquo;TV&rdquo;, &ldquo;Dyson&rdquo;&hellip;" autocomplete="off">
+    </label>
+    <label>Store
+      <select id="store-filter"></select>
+    </label>
+    <label>Discount
+      <select id="discount-filter">
+        <option value="0">Any discount</option>
+        <option value="30">30% off or more</option>
+        <option value="50">50% off or more</option>
+      </select>
+    </label>
+    <label>Sort by
+      <select id="sort-select"></select>
+    </label>
+    <button id="clear-filters" type="button">Clear filters</button>
+  </div>
+  <div id="mission-chips" class="chips missions" role="group" aria-label="Missions"></div>
+  <div id="category-chips" class="chips" role="group" aria-label="Category"></div>
+</section>
+<main id="app"></main>
+<footer>
+  <p>Every deal on this page was checked on the evening of 27 Nov 2026 at the store named, or in a deals roundup that names the store. Discounts are computed from the two prices shown. Prices move during Black Friday — confirm at checkout.</p>
+  <p>Deal Autopsy II is an independent finder. Store names belong to their owners; links go to the store's own search page for the product.</p>
+</footer>
+</body>
+</html>

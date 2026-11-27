@@ -1,0 +1,195 @@
+/* Deal Autopsy II — Price War. Warm paper, dark ink, one red accent.
+   Cards carry their verdict on the left edge; the cheapest store cell in
+   a Price War row is painted green. Everything is readable at phone width. */
+
+:root {
+  --paper: #faf7f1;
+  --card: #fffdf8;
+  --ink: #1c1a17;
+  --muted: #6b655a;
+  --line: #e3ddd0;
+  --red: #c81e1e;
+  --green: #0a6b2d;
+  --blue: #0a4d9e;
+  --amber: #7d5700;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: Georgia, "Times New Roman", serif;
+  line-height: 1.5;
+}
+
+a { color: var(--blue); }
+a:visited { color: #5a3d8a; }
+
+.masthead {
+  background: var(--ink);
+  color: #f5f1e8;
+  padding: 26px 22px 18px;
+}
+.masthead a { color: #f5f1e8; text-decoration: none; }
+.kicker { margin: 0 0 6px; letter-spacing: 0.14em; font-size: 12px; color: #d8cfae; font-family: system-ui, sans-serif; }
+.masthead h1 { margin: 0; font-size: 40px; line-height: 1.05; }
+.masthead h1 .subtitle { font-size: 22px; color: #e8b4b4; font-style: italic; }
+.tagline { margin: 10px 0 0; max-width: 720px; font-size: 17px; }
+.ticker { margin: 12px 0 0; font-family: system-ui, sans-serif; font-size: 13px; color: #cfc8b8; }
+
+.tabs { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.tab {
+  font-family: system-ui, sans-serif;
+  font-size: 14px; font-weight: 700;
+  padding: 8px 14px; border-radius: 999px;
+  border: 1px solid #55503f; color: #f5f1e8; background: transparent;
+}
+.tab.active { background: #f5f1e8; color: var(--ink); border-color: #f5f1e8; }
+
+.controls {
+  padding: 16px 22px 6px;
+  background: #f2ede1;
+  border-bottom: 1px solid var(--line);
+}
+.control-row { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+.control-row label {
+  font-family: system-ui, sans-serif; font-size: 12px; font-weight: 700;
+  color: var(--muted); display: flex; flex-direction: column; gap: 4px;
+}
+.search-wrap { flex: 1 1 260px; }
+input[type="search"], select {
+  font: inherit; font-size: 15px; padding: 9px 10px;
+  border: 1px solid #c9c2b4; border-radius: 8px; background: #fff; color: var(--ink);
+}
+#clear-filters {
+  font: inherit; font-family: system-ui, sans-serif; font-size: 14px; font-weight: 700;
+  padding: 9px 14px; border-radius: 8px; border: 1px solid var(--ink);
+  background: var(--ink); color: #fff; cursor: pointer;
+}
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.chips.missions { margin-bottom: 0; }
+.chip {
+  font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600;
+  padding: 6px 12px; border-radius: 999px; border: 1px solid #b8b09c;
+  background: #fff; color: var(--ink); cursor: pointer;
+}
+.chip.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+.missions .chip { border-color: var(--red); color: var(--red); }
+.missions .chip.active { background: var(--red); color: #fff; }
+
+main { padding: 18px 22px 30px; max-width: 1180px; margin: 0 auto; }
+
+.meter {
+  border: 2px solid var(--ink); border-radius: 12px;
+  background: var(--card); padding: 14px 18px; margin-bottom: 14px;
+}
+.meter-line { margin: 0; font-family: system-ui, sans-serif; font-size: 17px; }
+.meter-sub { margin: 6px 0 0; color: var(--muted); font-size: 15px; }
+.result-count { font-family: system-ui, sans-serif; font-size: 13px; color: var(--muted); margin: 0 0 12px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.card {
+  background: var(--card); border: 1px solid var(--line); border-left: 5px solid var(--ink);
+  border-radius: 10px; padding: 14px 16px 12px;
+}
+.card h3 { margin: 8px 0 4px; font-size: 19px; line-height: 1.25; }
+.card h3 a { color: var(--ink); text-decoration: none; }
+.card h3 a:hover { text-decoration: underline; }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.badge {
+  font-family: system-ui, sans-serif; font-size: 11px; font-weight: 800;
+  letter-spacing: 0.06em; padding: 3px 8px; border-radius: 4px; border: 1px solid;
+}
+.cat { font-family: system-ui, sans-serif; font-size: 12px; color: var(--muted); }
+.store-line, .checked { font-family: system-ui, sans-serif; font-size: 13px; color: var(--muted); margin: 2px 0; }
+.store-link { font-weight: 700; }
+.price-line { margin: 10px 0 2px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.price-line .sale { font-size: 30px; font-weight: 800; }
+.price-line.big .sale { font-size: 42px; }
+.price-line .usual { font-size: 17px; color: var(--muted); }
+.price-line .off {
+  font-family: system-ui, sans-serif; font-size: 15px; font-weight: 800;
+  color: #fff; background: var(--red); border-radius: 6px; padding: 2px 8px;
+}
+.save-line { margin: 0 0 8px; font-family: system-ui, sans-serif; font-size: 14px; color: var(--green); font-weight: 700; }
+.score { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-family: system-ui, sans-serif; }
+.score-num { font-size: 22px; font-weight: 800; }
+.score-of { font-size: 12px; color: var(--muted); }
+.score-track { flex: 1; height: 8px; background: #e8e2d4; border-radius: 4px; overflow: hidden; }
+.score-fill { display: block; height: 100%; background: var(--green); }
+.score-why { font-family: system-ui, sans-serif; font-size: 13px; color: var(--muted); margin: 4px 0 10px; }
+.evidence { margin: 8px 0; font-size: 15px; }
+.spark { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
+.spark-cap { display: block; font-family: system-ui, sans-serif; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.card-actions { display: flex; gap: 10px; margin: 12px 0 0; }
+.btn {
+  font-family: system-ui, sans-serif; font-size: 14px; font-weight: 700;
+  padding: 9px 14px; border-radius: 8px; background: var(--red); color: #fff;
+  text-decoration: none; border: 1px solid var(--red);
+}
+.btn.ghost { background: transparent; color: var(--ink); border-color: var(--ink); }
+.btn.big { font-size: 16px; padding: 12px 18px; }
+.empty { font-size: 17px; padding: 24px; text-align: center; }
+
+.back { font-family: system-ui, sans-serif; font-size: 14px; margin: 0 0 12px; }
+.detail { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; }
+.detail h2 { margin: 8px 0 4px; font-size: 28px; line-height: 1.2; }
+.detail-head { display: flex; gap: 10px; align-items: center; }
+.cond-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+.cond-chip {
+  font-family: system-ui, sans-serif; font-size: 12px; font-weight: 700;
+  border: 1px solid var(--blue); color: var(--blue); border-radius: 999px; padding: 4px 10px;
+}
+.evidence-box { border: 1px solid var(--line); border-radius: 10px; padding: 12px 16px; margin: 16px 0; background: #fbf8ef; }
+.evidence-box h2, .compare h2, .history h2, .war-intro h2, .shame-section h2 { font-size: 20px; margin: 0 0 8px; }
+.checks { list-style: none; margin: 0; padding: 0; }
+.checks li { padding: 6px 0; border-bottom: 1px dashed var(--line); font-size: 15px; }
+.checks li:last-child { border-bottom: none; }
+.checks li.ok { color: var(--ink); }
+.checks li.no { color: var(--red); }
+.compare { margin: 16px 0; }
+.compare table, .war-table { width: 100%; border-collapse: collapse; font-family: system-ui, sans-serif; font-size: 14px; }
+.compare th, .compare td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.compare tr.cheapest td { background: #dcf1e2; font-weight: 700; }
+.compare-note { font-size: 13px; color: var(--muted); font-family: system-ui, sans-serif; }
+.history { margin: 16px 0; }
+
+.war-intro { margin-bottom: 16px; }
+.war-intro h2 { font-size: 28px; margin: 0 0 6px; }
+.war-intro p { margin: 0; max-width: 760px; font-size: 16px; }
+.war-row { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+.war-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.war-head h3 { margin: 0; font-size: 20px; flex: 1 1 320px; }
+.war-head h3 a { color: var(--ink); text-decoration: none; }
+.war-score { font-family: system-ui, sans-serif; font-size: 13px; color: var(--muted); }
+.war-table { margin-top: 12px; }
+.war-table td { padding: 12px 10px; border: 1px solid var(--line); vertical-align: top; width: 25%; }
+.war-table td.war-best { background: #dcf1e2; }
+.war-store, .war-price, .war-over { display: block; }
+.war-store { font-weight: 700; }
+.war-price { font-size: 24px; font-weight: 800; margin: 2px 0; }
+.war-over { font-size: 12px; color: var(--muted); }
+.war-line { font-size: 15px; margin: 10px 0 0; }
+.war-note { font-size: 13px; color: var(--muted); font-family: system-ui, sans-serif; }
+
+.shame-section { margin-bottom: 22px; }
+.shame-section h2 { font-size: 22px; margin: 0 0 4px; }
+.shame-section > p { margin: 0 0 12px; color: var(--muted); }
+.shame-card { border-left-color: var(--red); }
+.wait-line { font-family: system-ui, sans-serif; font-size: 14px; margin: 8px 0; color: var(--green); }
+
+footer { padding: 18px 22px 30px; color: var(--muted); font-size: 13px; font-family: system-ui, sans-serif; max-width: 1180px; margin: 0 auto; }
+footer p { margin: 4px 0; }
+
+@media (max-width: 640px) {
+  .masthead { padding: 20px 16px 14px; }
+  .masthead h1 { font-size: 30px; }
+  .controls, main { padding-left: 14px; padding-right: 14px; }
+  .grid { grid-template-columns: 1fr; }
+  .war-table td { display: block; width: auto; }
+  .war-table tr { display: block; }
+  .detail h2 { font-size: 22px; }
+  .price-line.big .sale { font-size: 34px; }
+}
